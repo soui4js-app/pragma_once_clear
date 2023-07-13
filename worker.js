@@ -77,9 +77,10 @@ function rep_pragma_once(path){
             const pattern = /#pragma\s+once/;
             if(pattern.test(u8str)){
                 let path2=path;
-                path2.replace("/","\\");
+                path2=path2.replace("/","\\");
                 let name = path2.split("\\").pop().split(".")[0];//get file name.
                 name = name.toUpperCase();
+                name = name.replace("-","_");
                 let def = "__"+name+"__H__";
                 let pos1 = u8str.search(pattern);
                 let pos2 = u8str.search("#ifndef");

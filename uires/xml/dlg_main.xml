@@ -27,7 +27,7 @@ translucent="1"
 				<template itemHeight="50" layout="vbox" interval="2" padding="5" skin="skin_item_bk">
 					<window size="-2,30" layout="hbox" interval="2">
 						<check name="chk_flag"/>
-						<text name="txt_file" size="0,-1" weight="1" msgTransparent="0"/>
+						<text name="txt_file" size="0,-1" dotted="1" weight="1" msgTransparent="0"/>
 						<img name="img_status" skin="skin_status" iconIndex="-1"/>
 					</window>					
 					<window size="-2,2" colorBkgnd="@color/blue"/>
