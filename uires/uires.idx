@@ -14,6 +14,7 @@
   <img>
     <file name="png_item_bk" path="image\item_bk.png"/>
     <file name="png_xy_btn" path="image\xy_btn.png"/>
+    <fila name="png_status" path="image\status.png"/>
   </img>
   <ICON>
     <file name="ICON_LOGO"  path="image\soui.ico"/>

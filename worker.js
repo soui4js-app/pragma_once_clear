@@ -45,6 +45,7 @@ function enumFiles(folder,exts){
 }
 
 function rep_pragma_once(path){
+    let ret = 0;
     let file = std.open(path,"rb");
     if(file!=null){
         file.seek(0,std.SEEK_END);
@@ -66,7 +67,11 @@ function rep_pragma_once(path){
             console.log("this is a utf16 text file");
             let u8Buf2 = utils.WString2String(u8Buf.subarray(2));
             u8str = utils.Buffer2String(u8Buf2);
-        }			
+        }else{
+            let u16buf = utils.String2WString(u8Buf,utils.CP_ACP);
+            let u8Buf2 = utils.WString2String(u16buf);
+            u8str = utils.Buffer2String(u8Buf2);
+        }
         file.close();
         if(u8str!=""){
             const pattern = /#pragma\s+once/;
@@ -98,9 +103,11 @@ function rep_pragma_once(path){
                 if(addTail)
                     fileOut.puts("\n#endif // "+def);
                 fileOut.close();
+                ret = 1;
             }
         }
     }
+    return ret;
 }
 
 function handle_msg(e) {
@@ -126,14 +133,15 @@ function handle_msg(e) {
         }
         case "start_rep":{
             let files = ev.fileList;
-            parent.postMessage({ type: "rep_range", length:files.length });
+            parent.postMessage({ type: "rep_range", total:files.length });
             for(let i = 0;i<files.length && !bStop;i++){
                 let fileInfo = files[i];
+                let ret = -1;
                 if(fileInfo.chk_flag){
-                    rep_pragma_once(fileInfo.path);
+                    ret = rep_pragma_once(fileInfo.path);
                     parent.poll();
                 }
-                parent.postMessage({ type: "rep_prog", pos:i });
+                parent.postMessage({ type: "rep_prog", pos:i, status:ret });
             }
             parent.postMessage({ type: "rep_done" });
             console.log("post rep msg done");

@@ -11,7 +11,8 @@ class FileLvAdapter extends soui4.SLvAdapter{
 		this.mainDlg = mainDlg;
 		this.onGetView= this.getView;
 		this.onGetCount = this.getCount;
-		this.fileList = []; //prepare a file list.
+		this.fileList = []; //prepare a file list. {path,chk_flag,status}
+		this.dirtyCount = 0;
 	}
 
 	getView(pos,pItem,pTemplate){
@@ -24,6 +25,10 @@ class FileLvAdapter extends soui4.SLvAdapter{
 		let wndChkFlag = pItem.FindIChildByName("chk_flag");		
 		wndChkFlag.SetCheck(this.fileList[pos].chk_flag);
 		soui4.SConnect(wndChkFlag,soui4.EVT_CMD,this,this.onCheckClick);
+		let imgStatus = pItem.FindIChildByName("img_status");
+		let imgApi = soui4.QiIImageWnd(imgStatus);
+		imgApi.SetIcon(this.fileList[pos].status);
+		imgApi.Release();
 		soui4.SConnect(pItem,soui4.EVT_ITEMPANEL_DBCLICK,this,this.onBtnExplore);
 	}
 
@@ -57,11 +62,24 @@ class FileLvAdapter extends soui4.SLvAdapter{
 	
 	setFiles(files){
 		for(let i=0;i<files.length;i++){
-			this.fileList.push({path:files[i],chk_flag:true});
+			this.fileList.push({path:files[i],chk_flag:true,status:-1});
 		}
 		this.notifyDataSetChanged();
 	}
-	
+
+	setFileStatus(iFile,status){
+		this.fileList[iFile].status = status;
+		this.dirtyCount ++;
+		if(this.dirtyCount>10){
+			this.update();
+		}
+	}
+
+	update(){
+		this.dirtyCount=0;
+		this.notifyDataSetChanged();
+	}
+
 	clear(){
 		this.fileList=[];
 		this.notifyDataSetChanged();
@@ -137,10 +155,23 @@ class MainDialog extends soui4.JsHostWnd{
 		this.worker.onmessage = function (e) {
 			var ev = e.data;
 			switch(ev.type) {
-			case "rep_range":
-				break;
-			case "rep_prog":
-				break;
+				case "rep_range":
+					{
+						let progApi = soui4.QiIProgress(this.opaque.prog_scan);
+						progApi.SetRange(0,ev.total);
+						progApi.SetValue(0);
+						progApi.Release();
+						console.log("prog",ev.path);
+					}
+					break;
+				case "rep_prog":
+					{						
+						let progApi = soui4.QiIProgress(this.opaque.prog_scan);
+						progApi.SetValue(ev.pos+1);
+						progApi.Release();					
+						this.opaque.lv_adapter.setFileStatus(ev.pos,ev.status);
+					}
+					break;
 			case "rep_done":
 				/* terminate */
 				let _this = this.opaque;
