@@ -178,6 +178,7 @@ class MainDialog extends soui4.JsHostWnd{
 				this.onmessage = null;
 				this.opaque = null;
 				_this.worker = null;
+				_this.lv_adapter.update();
 				console.log("worker finished");
 				break;
 			}
